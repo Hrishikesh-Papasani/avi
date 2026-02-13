@@ -96,7 +96,7 @@
         /* IMAGE FIX: Limit height so it doesn't push content off screen */
         img {
             max-width: 100%;
-            max-height: 35vh; /* Key fix: prevent tall images from breaking layout */
+            max-height: 65vh; /* Key fix: prevent tall images from breaking layout */
             height: auto;
             border-radius: 10px;
             margin-bottom: 10px;
@@ -195,7 +195,6 @@
             { img: "PHOTO-2026-02-13-20-06-17.jpg", text: "Our private accounts! You made it based on a nickname I gave to you, the very iconic 'Ashi' ❤️" },
             { img: "PHOTO-2026-02-13-19-59-32.jpg", text: "From all that, to being driven in scooty like passenger princess by you 😎" },
             { img: "PHOTO-2026-02-13-20-35-02.jpg", text: "To finally celebrating your birthday together, oh babe how far we have come 🩷" } 
-
         ];
 
         const quizData = [
@@ -203,21 +202,26 @@
             { q: "Who loves the other more?", options: ["You", "Me", "Both Equally"], answer: "Both Equally" }
         ];
 
+        // MAKE SURE THESE ARE IN THE ORDER YOU WANT HER TO SEE THEM
         const noTexts = [
             "Are you sure shi? 🥺", 
-            "Really sure?", 
-            "Think again shi!", 
+            "Pakka?", 
+            "Plssssss!", 
             "Last chance!", 
-            "Change of heart?", 
-            "Plssssss? ", 
-            "Give it another thought!",  
-            "Wouldn't you reconsider?", 
-            "Is that your final answer shi?"
+            "Noi, I won't accept. Try again idc 😡", 
+            "Accept krlo naaaaa ", 
+            "Bohot peetunga Bhopal aakr", 
+            "Is that your final answer shi?",
+            "I am going to cry...",
+            "Okay, I'm actually crying now 😭",
+            "You made me cry waah bohot tang krte ho",
+            "Ab chup chaap accept kro, that's enough 🙂"
         ];
 
         // --- STATE MANAGEMENT ---
         let currentMemory = 0;
         let currentQuiz = 0;
+        let noTextIndex = 0; // NEW: Tracks which message we are on
 
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(div => div.style.display = 'none');
@@ -261,7 +265,7 @@
                 data.options.forEach(opt => {
                     const btn = document.createElement('button');
                     btn.innerText = opt;
-                    btn.style.backgroundColor = "#ff4d4d"; // Reset style
+                    btn.style.backgroundColor = "#ff4d4d";
                     btn.style.color = "white";
                     btn.onclick = () => {
                         if (opt === data.answer) {
@@ -290,9 +294,11 @@
             yesScale += 0.2; 
             yesBtn.style.transform = `scale(${yesScale})`;
 
-            // 2. Display random message below buttons
-            const randomIndex = Math.floor(Math.random() * noTexts.length);
-            messageContainer.innerText = noTexts[randomIndex];
+            // 2. Display messages in ORDER
+            messageContainer.innerText = noTexts[noTextIndex];
+            
+            // 3. Move to next message (loop back to 0 if at the end)
+            noTextIndex = (noTextIndex + 1) % noTexts.length;
         });
 
         yesBtn.addEventListener('click', () => {
