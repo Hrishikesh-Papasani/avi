@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For My Special Person</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #ffe6e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Full viewport height */
+            text-align: center;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+            -webkit-tap-highlight-color: transparent; /* Removes blue tap box on iPhone */
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;      /* Responsive width */
+            max-width: 350px; /* Cap width for larger screens */
+            position: relative; 
+            z-index: 10;
+            box-sizing: border-box; /* Ensures padding doesn't widen the box */
+        }
+
+        h1 { color: #d32f2f; margin-bottom: 20px; font-size: 1.8rem; }
+        p { color: #555; font-size: 1.1rem; line-height: 1.5; margin: 10px 0; }
+        
+        input {
+            padding: 12px;
+            border: 2px solid #ff9999;
+            border-radius: 8px;
+            width: 80%;
+            margin-bottom: 15px;
+            font-size: 1.1rem; /* Larger font for mobile input to prevent zoom */
+            text-align: center;
+            outline: none;
+        }
+        
+        input:focus { border-color: #d32f2f; }
+
+        /* General Button Styling */
+        button {
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s;
+            
+            /* Mobile Safety Properties */
+            max-width: 100%;       /* Prevent overflowing container */
+            white-space: normal;   /* Allow text to wrap inside button */
+            line-height: 1.3;      /* Better reading for wrapped text */
+            touch-action: manipulation; /* Improves touch response */
+        }
+
+        button:active { transform: scale(0.95); }
+
+        /* Specific Layout for Quiz Buttons */
+        #quiz-options {
+            display: flex;
+            flex-wrap: wrap;       /* Allow buttons to wrap to next line */
+            justify-content: center;
+            gap: 12px;             /* CRITICAL: Adds space between wrapped buttons */
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* The Yes/No Buttons Container */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        #yesBtn { background-color: #ff4d4d; color: white; font-weight: bold; }
+        #noBtn { background-color: white; color: #ff4d4d; border: 2px solid #ff4d4d; }
+
+        .page { display: none; animation: fadeIn 0.5s ease-in-out; }
+        #page1 { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .error { color: #d32f2f; font-size: 0.9rem; display: none; margin-top: 10px; font-weight: bold; }
+
+        /* Letter Styling */
+        .letter-container {
+            background-color: #fff9f0;
+            border: 2px dashed #ff9999;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+            margin-top: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.6;
+            color: #444;
+            max-height: 300px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iPhone */
+        }
+
+        .signature {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #d32f2f;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #message-container {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #d32f2f;
+            min-height: 1.5em;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="page1" class="page container">
+        <h1>🔒 Security Check</h1>
+        <p>This site is protected. To enter, please enter our special four digits <b>XXXX</b> format.</p>
+        <input type="number" id="passcode" placeholder="e.g. 4521" pattern="\d*"> <br>
+        <button onclick="checkPasscode()" style="background-color: #ff4d4d; color: white;">Unlock Heart</button>
+        <p id="error-msg" class="error">Incorrect! Try again, meri jaan. ❤️</p>
+    </div>
+
+    <div id="page2" class="page container">
+        <h1>📸 Memory Lane</h1>
+        <img id="memory-img" src="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif"> 
+        <p id="memory-text">Remember this day?</p>
+        <button onclick="nextMemory()" style="background-color: #ff4d4d; color: white;">Next Memory ➡️</button>
+    </div>
+
+    <div id="page3" class="page container">
+        <h1>🧠 Quick Quiz</h1>
+        <p id="quiz-question">Question 1: What is my favorite food?</p>
+        <div id="quiz-options"></div>
+    </div>
+
+    <div id="page4" class="page container">
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2QyZzZ4Nnl5aG55YnZ5eG55YnZ5eG55YnZ5eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Cute Bear">
+        <h1>Will you be my Valentine?</h1>
+        
+        <div class="buttons">
+            <button id="yesBtn">Yes</button>
+            <button id="noBtn">No</button>
+        </div>
+        <p id="message-container"></p>
+    </div>
+
+    <div id="page5" class="page container">
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3QyZzZ4Nnl5aG55YnZ5eG55YnZ5eG55YnZ5eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26BRv0ThflsHCqDrG/giphy.gif" alt="Happy Us" style="width: 150px;">
+        <h2>Yay! You said Yes! ❤️</h2>
+        
+        <div class="letter-container">
+            <p><strong>My Dearest Valentine,</strong></p>
+            <p>I know we can't go out for a fancy dinner tonight, and I can't be there to hug you in person, but I wanted to do something special to show you how much you mean to me.</p>
+            <p>Distance is just a test to see how far love can travel, and my love for you travels the whole way, every single day and night.</p>
+            <p>Thank you for being my person, even from miles away.</p>
+            <p class="signature">- Always Yours, Hirishi</p>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.9rem; color: #888;">(Next Valentine's, I promise I'll be holding your hand. 🤝)</p>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const PASSWORD = "1111"; 
+        
+        const memories = [
+            { img: "PHOTO-2026-02-13-20-15-33.jpg", text: "Your first ever pic I saw :)" },
+            { img: "PHOTO-2026-02-13-20-11-57.jpg", text: "Our hand drawn insta heart 😃" },
+            { img: "PHOTO-2026-02-13-20-06-17.jpg", text: "Our private accounts! You made it based on a nickname I gave to you, the very iconic 'Ashi' ❤️" },
+            { img: "PHOTO-2026-02-13-19-59-32.jpg", text: "From all that, to being driven in scooty like passenger princess by you 😎" },
+            { img: "PHOTO-2026-02-13-20-35-02.jpg", text: "To finally celebrating your birthday together, oh babe how far we have come 🩷" } 
+
+        ];
+
+        const quizData = [
+            { q: "What do I like more?", options: ["Dune", "Game of Thrones", "Guardian (Goblin) K-drama"], answer: "Dune" }, 
+            { q: "Who loves the other more?", options: ["You", "Me", "Both Equally"], answer: "Both Equally" }
+        ];
+
+        const noTexts = [
+            "Are you sure shi? 🥺", 
+            "Really sure?", 
+            "Think again shi!", 
+            "Last chance!", 
+            "Change of heart?", 
+            "Plssssss? ", 
+            "Give it another thought!",  
+            "Wouldn't you reconsider?", 
+            "Is that your final answer shi?"
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentMemory = 0;
+        let currentQuiz = 0;
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(div => div.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        // --- PAGE 1 LOGIC ---
+        function checkPasscode() {
+            const input = document.getElementById('passcode').value;
+            if (input === PASSWORD) {
+                showPage('page2');
+                loadMemory();
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        // --- PAGE 2 LOGIC ---
+        function loadMemory() {
+            if (currentMemory < memories.length) {
+                document.getElementById('memory-img').src = memories[currentMemory].img;
+                document.getElementById('memory-text').innerText = memories[currentMemory].text;
+            } else {
+                showPage('page3');
+                loadQuiz();
+            }
+        }
+        function nextMemory() {
+            currentMemory++;
+            loadMemory();
+        }
+
+        // --- PAGE 3 LOGIC ---
+        function loadQuiz() {
+            if (currentQuiz < quizData.length) {
+                const data = quizData[currentQuiz];
+                document.getElementById('quiz-question').innerText = data.q;
+                const optionsDiv = document.getElementById('quiz-options');
+                optionsDiv.innerHTML = "";
+                
+                data.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.innerText = opt;
+                    btn.style.backgroundColor = "#ff4d4d"; // Reset style
+                    btn.style.color = "white";
+                    btn.onclick = () => {
+                        if (opt === data.answer) {
+                            currentQuiz++;
+                            loadQuiz();
+                        } else {
+                            alert("Wrong! Issokayyy, try again baby 😜");
+                        }
+                    };
+                    optionsDiv.appendChild(btn);
+                });
+            } else {
+                showPage('page4');
+            }
+        }
+
+        // --- PAGE 4 PROPOSAL LOGIC ---
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const messageContainer = document.getElementById('message-container');
+        
+        let yesScale = 1;
+
+        noBtn.addEventListener('click', () => {
+            // 1. Make Yes button bigger
+            yesScale += 0.2; 
+            yesBtn.style.transform = `scale(${yesScale})`;
+
+            // 2. Display random message below buttons
+            const randomIndex = Math.floor(Math.random() * noTexts.length);
+            messageContainer.innerText = noTexts[randomIndex];
+        });
+
+        yesBtn.addEventListener('click', () => {
+            showPage('page5');
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        });
+    </script>
+</body>
+</html>
